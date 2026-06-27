@@ -1,0 +1,17 @@
+{
+  "models": [
+    {
+      "name": "gpt-4o",
+      "api_key": "sk-your-openai-key",
+      "base_url": "https://api.openai.com/v1"
+    },
+    {
+      "name": "moonshot-v1-8k",
+      "api_key": "sk-your-moonshot-key",
+      "base_url": "https://api.moonshot.cn/v1"
+    }
+  ],
+  "difficulty": ["easy", "medium", "hard"],
+  "runs_per_challenge": 1,
+  "timeout": 30
+}
