@@ -8,6 +8,28 @@ from dataclasses import dataclass
 from challenges.base import Challenge
 
 
+def _check_code_safety(code: str) -> tuple[bool, str]:
+    """检查代码是否包含危险操作。"""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as e:
+        return False, f"语法错误: {e}"
+
+    dangerous_modules = {"os", "sys", "subprocess", "shutil", "socket", "http", "ftplib",
+                         "ctypes", "importlib", "pathlib", "signal", "multiprocessing"}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name.split(".")[0] in dangerous_modules:
+                    return False, f"禁止导入模块: {alias.name}"
+        if isinstance(node, ast.ImportFrom):
+            if node.module and node.module.split(".")[0] in dangerous_modules:
+                return False, f"禁止导入模块: {node.module}"
+
+    return True, ""
+
+
 @dataclass
 class EvalResult:
     """单题评估结果。"""
@@ -24,6 +46,9 @@ class EvalResult:
 def run_test_case(code: str, func_name: str, challenge: Challenge, test_case) -> bool:
     """执行单个测试用例，返回是否通过。"""
     namespace = {}
+    safe, msg = _check_code_safety(code)
+    if not safe:
+        return False
     try:
         exec(code, namespace)
     except Exception:
